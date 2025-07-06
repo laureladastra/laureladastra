@@ -1,13 +1,11 @@
 on:
-  workflow_dispatch:
-    inputs:
-      name:
-        description: 'the Github user to create commit illustration for'
-
+  schedule:
+    - cron: 0 15 * * *
 name: laure ladastra README.md
 env:
   GH_TOKEN: ${{ github.token }}
   commit_message: 'GH Actions: updated SVG img'
+  user: laureladastra
 jobs:
   generate-svg:
     runs-on: ubuntu-latest
@@ -36,7 +34,7 @@ jobs:
         uses: Platane/snk@v3
         if: ${{ steps.evaluate-commits.outputs.execution  != 'false' }}
         with:
-          github_user_name: ${{ github.event.inputs.name }}
+          github_user_name: ${{ env.user }}
           outputs: |
             ./img/github-snake.svg
             ./img/github-snake-dark.svg?palette=github-dark
