@@ -1,0 +1,48 @@
+on: workflow_dispatch
+
+name: laureladastra/laureladastra README.md
+env:
+  GH_TOKEN: ${{ github.token }}
+  commit_message: "GH Actions: updated SVG img"
+  user: laureladastra
+jobs:
+  generate-svg:
+    runs-on: ubuntu-latest
+    name: Generate SVG
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+        # should only produce artifacts if there are new commits between last run of repo and latest push
+      - name: Evaluate commits
+        id: evaluate-commits
+        shell: pwsh
+        run: |
+          $event =  (gh api /users/laureladastra/events | ConvertFrom-Json -AsHashtable | where { $_.type -eq "PushEvent" -AND $_.repo.name -ne 'laureladastra/laureladastra'} | Sort-Object -Property created_at -Descending | select -First 1)
+          $eventDate = $event.created_at
+          $timeStampWorkflow = (gh run list -w '${{ github.workflow }}' -b main --limit 1 --status success --json createdAt | ConvertFrom-Json).createdAt
+          echo "Last commit: $eventDate and last workflow: $($timeStampWorkflow ? $timeStampWorkflow : 'n/a' )"
+          if ($eventDate -lt $timeStampWorkflow -or $commit.commit.message -eq '${{ env.commit_message }}') {
+            echo ::warning title={Evaluate commits}::{No new commits to generate image from}
+            echo "execution=false" >> $env:GITHUB_OUTPUT
+          }
+      - name: Generate image
+        id: generate-image
+        uses: Platane/snk@v3
+        if: ${{ steps.evaluate-commits.outputs.execution  != 'false' }}
+        with:
+          github_user_name: ${{ env.user }}
+          outputs: |
+            ./img/github-snake-orqest.svg
+            ./img/github-snake-orqest-dark.svg?palette=github-dark
+            ./img/github-orqest.gif?color_snake=#c40000&color_dots=#16191f,#093843,#104e5c,#3a879d,#09c6d1
+            - name: Push to GitHub
+      - name: Push to GitHub
+        id: push
+        if: ${{ steps.evaluate-commits.outputs.execution  != 'false' }}
+        uses: EndBug/add-and-commit@main
+        with:
+          push: "origin main"
+          message: ${{ env.commit_message }}
