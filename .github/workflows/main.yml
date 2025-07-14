@@ -1,6 +1,7 @@
-on: workflow_dispatch
-
 name: laureladastra/laureladastra README.md
+on:
+  schedule:
+    - cron: "0 0 * * *" # Every day at midnight UTC
 env:
   GH_TOKEN: ${{ github.token }}
   commit_message: "GH Actions: updated SVG img"
