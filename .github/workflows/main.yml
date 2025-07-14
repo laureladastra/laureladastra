@@ -35,9 +35,8 @@ jobs:
         with:
           github_user_name: ${{ env.user }}
           outputs: |
-            ./img/github-snake-orqest.svg
-            ./img/github-snake-orqest-dark.svg?palette=github-dark
-            ./img/github-orqest.gif?color_snake=#c40000&color_dots=#16191f,#093843,#104e5c,#3a879d,#09c6d1
+            ./img/github-snake.svg
+            ./img/github-snake-dark.svg?palette=github-dark
             - name: Push to GitHub
       - name: Push to GitHub
         id: push
